@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEO Content Checker</title>
+<meta name="description" content="Analyze your B2B content visibility in AI-powered search. GEO optimization tool by Anic.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=DM+Sans:opsz,wght@9..40,300..700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080d;--tx:#e4e4eb;--mu:#8b8b9e;--sf:rgba(255,255,255,0.03);--sfH:rgba(255,255,255,0.06);--bd:rgba(255,255,255,0.08);--purple:#a78bfa;--green:#6ee7b7;--yellow:#fbbf24;--pink:#f472b6}
+body{min-height:100vh;background:var(--bg);color:var(--tx);font-family:'Noto Sans SC','DM Sans',sans-serif;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 48px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.subtitle{color:var(--mu);font-size:13px;margin-top:5px;font-weight:300}
+.btn-lang{background:var(--sf);border:1px solid var(--bd);color:var(--tx);padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;font-family:'DM Sans',sans-serif}
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tab{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;transition:all .2s}
+.tab.active{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.3);color:#c4b5fd}
+textarea{width:100%;min-height:250px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:18px;color:var(--tx);font-size:14px;line-height:1.8;resize:vertical;font-family:'Noto Sans SC',sans-serif}
+textarea:focus{outline:none;border-color:rgba(167,139,250,.4)}
+.char-count{position:absolute;bottom:10px;right:14px;font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace}
+.dropzone{min-height:180px;background:var(--sf);border:2px dashed var(--bd);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;transition:all .2s}
+.dropzone.over{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.4)}
+.btn-main{width:100%;margin-top:16px;padding:13px 0;font-size:15px;font-weight:600;letter-spacing:.02em;border-radius:10px;border:none;cursor:pointer;transition:all .2s;color:#fff;background:linear-gradient(135deg,#7c3aed,#a78bfa)}
+.btn-main:disabled{opacity:.35;cursor:default}
+.btn-green{padding:11px 28px;background:linear-gradient(135deg,#059669,#6ee7b7);border:none;border-radius:8px;color:#0a0a0f;font-size:14px;font-weight:700;cursor:pointer}
+.btn-green-sm{display:inline-flex;align-items:center;gap:5px;padding:7px 16px;background:linear-gradient(135deg,#059669,#6ee7b7);border:none;border-radius:6px;color:#0a0a0f;font-size:13px;font-weight:700;cursor:pointer}
+.btn-reset{width:100%;padding:11px 0;font-size:14px;font-weight:500;background:var(--sf);border:1px solid var(--bd);border-radius:10px;color:var(--tx);cursor:pointer;transition:all .2s;margin-bottom:14px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:11px;padding:18px;transition:background .2s}
+.card:hover{background:var(--sfH)}
+.card-lg{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:28px 20px;text-align:center;position:relative;overflow:hidden}
+.gradient-top{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--green),var(--yellow),var(--pink))}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.bar-bg{width:100%;height:5px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.label-sm{font-size:10px;color:var(--mu);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-family:'DM Sans',sans-serif}
+.finding{font-size:12px;line-height:1.6;color:#c4c4d4;padding-left:8px;margin-bottom:4px}
+.suggestion{font-size:12px;line-height:1.6;color:#c4c4d4;margin-bottom:3px}
+.preview-box{background:rgba(0,0,0,.3);border:1px solid var(--bd);border-radius:8px;padding:16px;max-height:340px;overflow-y:auto}
+.preview-box pre{font-size:12px;line-height:1.8;color:#c4c4d4;white-space:pre-wrap;word-break:break-word;font-family:'Noto Sans SC','JetBrains Mono',monospace;margin:0}
+.footer{text-align:center;font-size:11px;color:var(--mu);opacity:.4;margin-top:32px;font-family:'DM Sans',sans-serif;letter-spacing:.03em}
+.score-ring{position:relative;margin:0 auto}
+.score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-num span:first-child{font-family:'JetBrains Mono',monospace;font-weight:700;line-height:1}
+.score-num span:last-child{font-size:14px;color:var(--mu);margin-top:4px}
+.loader{display:flex;flex-direction:column;align-items:center;gap:20px;padding:44px 0}
+.spinner{width:44px;height:44px;position:relative}
+.spinner div{position:absolute;border-radius:50%;border:2px solid transparent}
+.spinner .outer{inset:0;border-top-color:var(--purple);border-right-color:var(--purple);animation:spin .8s linear infinite}
+.spinner .inner{inset:6px;border-bottom-color:var(--green);border-left-color:var(--green);animation:spin 1.2s linear infinite reverse}
+.loader-text{color:var(--mu);font-size:13px;animation:fadeInOut 2.5s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeInOut{0%,100%{opacity:.4}50%{opacity:1}}
+@keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.su{animation:su .4s ease both}
+.hidden{display:none}
+@media(max-width:600px){.grid2{grid-template-columns:1fr}h1{font-size:22px}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1 id="title"></h1>
+      <p class="subtitle" id="subtitle"></p>
+    </div>
+    <button class="btn-lang" id="langBtn" onclick="toggleLang()"></button>
+  </div>
+
+  <!-- Input Phase -->
+  <div id="inputPhase" class="su">
+    <div class="tabs">
+      <button class="tab active" id="tabPaste" onclick="setMode('paste')"></button>
+      <button class="tab" id="tabUpload" onclick="setMode('upload')"></button>
+    </div>
+
+    <div id="pasteArea" style="position:relative">
+      <textarea id="textInput" oninput="updateCharCount()"></textarea>
+      <span class="char-count" id="charCount"></span>
+    </div>
+
+    <div id="uploadArea" class="dropzone hidden" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept=".docx,.md,.txt" style="display:none" onchange="handleFile(this.files[0])">
+      <div id="uploadPrompt">
+        <div style="text-align:center">
+          <span style="font-size:32px;opacity:.3">↑</span>
+          <p style="color:var(--mu);font-size:13px" id="dropText"></p>
+          <p style="color:var(--mu);font-size:11px" id="uploadHint"></p>
+        </div>
+      </div>
+      <div id="fileLoaded" class="hidden" style="text-align:center">
+        <div style="font-size:28px">📄</div>
+        <div style="font-size:14px;font-weight:500;margin-top:4px" id="fileNameDisplay"></div>
+        <div style="font-size:12px;color:#6ee7b7;margin-top:2px" id="fileInfo"></div>
+      </div>
+    </div>
+
+    <p id="errorMsg" style="color:#f87171;font-size:13px;margin-top:10px" class="hidden"></p>
+    <button class="btn-main" id="analyzeBtn" onclick="analyze()" disabled></button>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingPhase" class="hidden">
+    <div class="loader">
+      <div class="spinner"><div class="outer"></div><div class="inner"></div></div>
+      <p class="loader-text" id="loadingText"></p>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="resultPhase" class="hidden">
+    <!-- Overall Score -->
+    <div class="card-lg su" style="margin-bottom:14px" id="scoreCard">
+      <div class="gradient-top"></div>
+      <p class="label-sm" style="margin-bottom:12px;font-size:11px;letter-spacing:.1em" id="overallLabel"></p>
+      <div class="score-ring" id="scoreRing" style="width:140px;height:140px"></div>
+      <p style="margin-top:14px;font-size:13px;color:var(--mu);line-height:1.7" id="summaryText"></p>
+    </div>
+
+    <!-- Dimensions -->
+    <div class="grid2" id="dimsGrid"></div>
+
+    <!-- Rewrite Examples -->
+    <div id="examplesCard" class="card su hidden" style="padding:18px;margin-bottom:14px">
+      <p style="font-size:13px;font-weight:600;margin-bottom:12px" id="examplesTitle"></p>
+      <div id="examplesContent"></div>
+    </div>
+
+    <!-- Generate Rewrite -->
+    <div class="card su" style="padding:20px;margin-bottom:12px" id="rewriteCard">
+      <div id="rewritePrompt" style="text-align:center">
+        <p style="font-size:13px;color:var(--mu);margin-bottom:12px;line-height:1.6" id="rewriteDesc"></p>
+        <button class="btn-green" id="rewriteBtn" onclick="generateRewrite()"></button>
+      </div>
+      <div id="rewriteLoading" class="hidden">
+        <div class="loader">
+          <div class="spinner"><div class="outer"></div><div class="inner"></div></div>
+          <p class="loader-text" id="rewriteLoadingText"></p>
+        </div>
+      </div>
+      <div id="rewriteResult" class="hidden">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="color:#6ee7b7">✓</span>
+            <span style="font-size:13px;font-weight:600" id="rewriteReadyLabel"></span>
+          </div>
+          <button class="btn-green-sm" onclick="downloadMd()">↓ <span id="downloadLabel"></span></button>
+        </div>
+        <div class="preview-box">
+          <p class="label-sm" style="margin-bottom:8px" id="previewLabel"></p>
+          <pre id="rewritePreview"></pre>
+        </div>
+      </div>
+    </div>
+
+    <p id="resultError" style="color:#f87171;font-size:13px;margin-bottom:8px" class="hidden"></p>
+    <button class="btn-reset" id="resetBtn" onclick="resetAll()"></button>
+  </div>
+
+  <p class="footer" id="footerText"></p>
+</div>
+
+<script>
+// === State ===
+let lang = 'zh';
+let mode = 'paste';
+let content = '';
+let fileName = '';
+let result = null;
+let rewrittenMd = '';
+
+// === Translations ===
+const T = {
+  zh: {
+    title: "GEO 内容检查器",
+    subtitle: "检测你的 B2B 内容在 AI 搜索中的可见度与引用潜力",
+    paste: "粘贴文本", upload: "上传文件",
+    uploadHint: "支持 .docx 和 .md 格式",
+    placeholder: "在此粘贴你的文章内容...",
+    analyze: "开始分析",
+    overallScore: "综合评分",
+    structure: "结构可抓取性", structureDesc: "文章结构是否便于大模型理解和抓取关键信息",
+    concept: "概念可提取性", conceptDesc: "核心概念和术语是否有清晰定义，便于 AI 提取",
+    citation: "引用友好度", citationDesc: "是否包含具体数据、案例等 AI 回答时偏好引用的内容",
+    qa: "问答匹配度", qaDesc: "内容是否能直接回答用户可能问 AI 的问题",
+    findings: "发现", suggestions: "优化建议", examples: "改写示例",
+    original: "原文", optimized: "优化后", reason: "改写原因",
+    dropFile: "拖放文件到此处", reset: "重新检查", charCount: "字符",
+    langSwitch: "EN",
+    loading: ["正在解析文章结构…","正在评估 AI 搜索友好度…","正在生成优化建议…","正在生成改写示例…"],
+    rewriteLoading: ["正在根据分析结果改写全文…","正在优化文章结构…","正在提升 AI 搜索匹配度…","正在生成最终稿件…"],
+    scoreLabel: ["较差","一般","良好","优秀"],
+    emptyWarn: "请先输入或上传文章内容",
+    errorMsg: "分析出错，请检查网络后重试",
+    fileLoaded: "文件已加载",
+    generateRewrite: "生成 GEO 优化版全文",
+    rewriteReady: "优化版全文已生成",
+    downloadMd: "下载 Markdown 文件",
+    rewritePreview: "优化版预览",
+    rewriteDesc: "基于以上分析结果，一键生成 AI 搜索优化版全文",
+    matchedQ: "可匹配的用户提问",
+    footer: "Designed by Anic · Powered by Claude API",
+  },
+  en: {
+    title: "GEO Content Checker",
+    subtitle: "Analyze your B2B content visibility in AI-powered search",
+    paste: "Paste Text", upload: "Upload File",
+    uploadHint: "Supports .docx and .md",
+    placeholder: "Paste your article content here...",
+    analyze: "Analyze",
+    overallScore: "Overall Score",
+    structure: "Structure Crawlability", structureDesc: "Is the article structured for AI to easily parse and extract key info?",
+    concept: "Concept Extractability", conceptDesc: "Are key terms clearly defined for AI extraction?",
+    citation: "Citation Friendliness", citationDesc: "Does it contain data, cases, and evidence AI prefers to cite?",
+    qa: "Q&A Matchability", qaDesc: "Can the content directly answer questions users might ask AI?",
+    findings: "Findings", suggestions: "Suggestions", examples: "Rewrite Examples",
+    original: "Original", optimized: "Optimized", reason: "Reason",
+    dropFile: "Drop file here", reset: "New Check", charCount: "chars",
+    langSwitch: "中文",
+    loading: ["Parsing article structure…","Evaluating AI search friendliness…","Generating suggestions…","Generating rewrite examples…"],
+    rewriteLoading: ["Rewriting based on analysis…","Optimizing structure…","Improving AI matchability…","Generating final draft…"],
+    scoreLabel: ["Poor","Fair","Good","Excellent"],
+    emptyWarn: "Please enter or upload article content first",
+    errorMsg: "Analysis failed. Please check your connection and retry.",
+    fileLoaded: "File loaded",
+    generateRewrite: "Generate GEO-Optimized Version",
+    rewriteReady: "Optimized version ready",
+    downloadMd: "Download Markdown",
+    rewritePreview: "Optimized Preview",
+    rewriteDesc: "Generate a fully optimized version based on the analysis above",
+    matchedQ: "Matched User Questions",
+    footer: "Designed by Anic · Powered by Claude API",
+  }
+};
+
+const PROMPTS = {
+  zh: {
+    analyze: `你是专业的 B2B 内容生成式搜索优化（GEO）分析专家。分析文章在被 Kimi、DeepSeek、豆包、通义千问等大模型检索和引用时的友好程度。从四个维度分析，每个维度给 0-100 分、具体发现和建议：1.结构可抓取性(structure) 2.概念可提取性(concept) 3.引用友好度(citation) 4.问答匹配度(qa)，qa维度需列出3-5个匹配问题。严格返回JSON：{"overall_score":数字,"summary":"30字总评","dimensions":[{"key":"structure","score":数字,"findings":["..."],"suggestions":["..."]},{"key":"concept","score":数字,"findings":["..."],"suggestions":["..."]},{"key":"citation","score":数字,"findings":["..."],"suggestions":["..."]},{"key":"qa","score":数字,"findings":["..."],"suggestions":["..."],"matched_questions":["..."]}],"rewrite_examples":[{"original":"原文","optimized":"优化版","reason":"原因"}]}`,
+    rewrite: `你是B2B内容改写专家，专注GEO。根据分析报告改写原文。要求：保留全部核心信息；开头50字概括核心；标题改为自然语言问题；每段聚焦单一信息点；关键术语首现时定义；用因果逻辑；强化数据案例；确保能回答用户问AI的问题；保持专业调性；输出纯Markdown。只输出Markdown全文。`,
+    userMsg: (c) => `分析以下文章的 GEO 优化程度：\n\n${c}`,
+  },
+  en: {
+    analyze: `You are a B2B Generative Engine Optimization (GEO) analyst. Score four dimensions 0-100: Structure Crawlability(structure), Concept Extractability(concept), Citation Friendliness(citation), Q&A Matchability(qa). qa must include matched_questions. Return ONLY JSON: {"overall_score":number,"summary":"brief","dimensions":[{"key":"structure","score":number,"findings":["..."],"suggestions":["..."]},{"key":"concept","score":number,"findings":["..."],"suggestions":["..."]},{"key":"citation","score":number,"findings":["..."],"suggestions":["..."]},{"key":"qa","score":number,"findings":["..."],"suggestions":["..."],"matched_questions":["..."]}],"rewrite_examples":[{"original":"text","optimized":"text","reason":"text"}]}`,
+    rewrite: `You are a B2B GEO rewriting expert. Rewrite based on the analysis. Preserve all info; first 50 words summarize; headings as questions; single-point paragraphs; define terms; causal language; strengthen data; answer AI questions; professional tone; pure Markdown. Output ONLY Markdown.`,
+    userMsg: (c) => `Analyze the following article for GEO optimization:\n\n${c}`,
+  }
+};
+
+const DIM_META = {
+  structure: { color: '#a78bfa', icon: '◧' },
+  concept:   { color: '#6ee7b7', icon: '◈' },
+  citation:  { color: '#fbbf24', icon: '◇' },
+  qa:        { color: '#f472b6', icon: '◆' },
+};
+
+// === API Call ===
+async function callAPI(system, message, max_tokens) {
+  const resp = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ system, message, max_tokens }),
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error);
+  return data.text;
+}
+
+// === UI Helpers ===
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id).classList.remove('hidden'); }
+function hide(id) { $(id).classList.add('hidden'); }
+
+function applyLang() {
+  const L = T[lang];
+  $('title').textContent = L.title;
+  $('subtitle').textContent = L.subtitle;
+  $('langBtn').textContent = L.langSwitch;
+  $('tabPaste').textContent = L.paste;
+  $('tabUpload').textContent = L.upload;
+  $('textInput').placeholder = L.placeholder;
+  $('analyzeBtn').textContent = L.analyze;
+  $('dropText').textContent = L.dropFile;
+  $('uploadHint').textContent = L.uploadHint;
+  $('resetBtn').textContent = L.reset;
+  $('overallLabel').textContent = L.overallScore;
+  $('examplesTitle').textContent = L.examples;
+  $('rewriteDesc').textContent = L.rewriteDesc;
+  $('rewriteBtn').textContent = L.generateRewrite;
+  $('rewriteReadyLabel').textContent = L.rewriteReady;
+  $('downloadLabel').textContent = L.downloadMd;
+  $('previewLabel').textContent = L.rewritePreview;
+  $('footerText').textContent = L.footer;
+  document.documentElement.lang = lang === 'zh' ? 'zh' : 'en';
+  updateCharCount();
+}
+
+function toggleLang() {
+  lang = lang === 'zh' ? 'en' : 'zh';
+  applyLang();
+}
+
+function setMode(m) {
+  mode = m;
+  $('tabPaste').className = 'tab' + (m === 'paste' ? ' active' : '');
+  $('tabUpload').className = 'tab' + (m === 'upload' ? ' active' : '');
+  if (m === 'paste') { show('pasteArea'); hide('uploadArea'); }
+  else { hide('pasteArea'); show('uploadArea'); }
+}
+
+function updateCharCount() {
+  content = $('textInput').value;
+  const L = T[lang];
+  $('charCount').textContent = content.length > 0 ? `${content.length.toLocaleString()} ${L.charCount}` : '';
+  $('analyzeBtn').disabled = !content.trim();
+}
+
+async function handleFile(file) {
+  if (!file) return;
+  fileName = file.name;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext === 'md' || ext === 'txt') {
+    content = await file.text();
+  } else if (ext === 'docx') {
+    const buf = await file.arrayBuffer();
+    const res = await mammoth.extractRawText({ arrayBuffer: buf });
+    content = res.value;
+  }
+  hide('uploadPrompt');
+  show('fileLoaded');
+  $('fileNameDisplay').textContent = fileName;
+  $('fileInfo').textContent = `✓ ${T[lang].fileLoaded} · ${content.length.toLocaleString()} ${T[lang].charCount}`;
+  $('analyzeBtn').disabled = false;
+}
+
+// Drag & drop
+const dz = document.querySelector('.dropzone');
+if (dz) {
+  dz.addEventListener('dragover', (e) => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', (e) => { e.preventDefault(); dz.classList.remove('over'); handleFile(e.dataTransfer.files[0]); });
+}
+
+// === Loading Animation ===
+let loadingInterval = null;
+function startLoading(msgs, textEl) {
+  let idx = 0;
+  textEl.textContent = msgs[0];
+  loadingInterval = setInterval(() => {
+    idx = (idx + 1) % msgs.length;
+    textEl.textContent = msgs[idx];
+  }, 2500);
+}
+function stopLoading() {
+  if (loadingInterval) { clearInterval(loadingInterval); loadingInterval = null; }
+}
+
+// === Score Ring ===
+function renderScoreRing(score) {
+  const size = 140, sw = 8;
+  const r = (size - sw) / 2, circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
+  const color = score >= 80 ? '#22c55e' : score >= 60 ? '#eab308' : score >= 40 ? '#f97316' : '#ef4444';
+  const idx = score >= 80 ? 3 : score >= 60 ? 2 : score >= 40 ? 1 : 0;
+  $('scoreRing').innerHTML = `
+    <svg width="${size}" height="${size}" style="transform:rotate(-90deg)">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="${sw}"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${color}" stroke-width="${sw}"
+        stroke-dasharray="${circ}" stroke-dashoffset="${offset}" stroke-linecap="round"
+        style="transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)"/>
+    </svg>
+    <div class="score-num">
+      <span style="font-size:42px;color:${color}">${score}</span>
+      <span>${T[lang].scoreLabel[idx]}</span>
+    </div>`;
+}
+
+// === Render Results ===
+function renderDimensions(dimensions) {
+  const L = T[lang];
+  let html = '';
+  dimensions.forEach((dim) => {
+    const m = DIM_META[dim.key];
+    if (!m) return;
+    const label = L[dim.key] || dim.key;
+    const desc = L[dim.key + 'Desc'] || '';
+
+    let findingsHtml = '';
+    if (dim.findings?.length) {
+      findingsHtml = `<div style="margin-top:10px"><p class="label-sm">${L.findings}</p>${dim.findings.map(f => `<p class="finding" style="border-left:2px solid ${m.color}33">${f}</p>`).join('')}</div>`;
+    }
+    let suggestionsHtml = '';
+    if (dim.suggestions?.length) {
+      suggestionsHtml = `<div style="margin-top:8px"><p class="label-sm">${L.suggestions}</p>${dim.suggestions.map(s => `<p class="suggestion">→ ${s}</p>`).join('')}</div>`;
+    }
+    let questionsHtml = '';
+    if (dim.matched_questions?.length) {
+      questionsHtml = `<div style="margin-top:8px"><p class="label-sm">${L.matchedQ}</p>${dim.matched_questions.map(q => `<p style="font-size:12px;line-height:1.6;color:${m.color};font-style:italic;margin-bottom:3px">"${q}"</p>`).join('')}</div>`;
+    }
+
+    html += `<div class="card su">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="color:${m.color};font-size:13px">${m.icon}</span>
+          <span style="font-size:13px;font-weight:600">${label}</span>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:${m.color}">${dim.score}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${dim.score}%;background:${m.color}"></div></div>
+      <p style="font-size:11px;color:var(--mu);margin-top:7px;line-height:1.5">${desc}</p>
+      ${findingsHtml}${suggestionsHtml}${questionsHtml}
+    </div>`;
+  });
+  $('dimsGrid').innerHTML = html;
+}
+
+function renderExamples(examples) {
+  if (!examples?.length) { hide('examplesCard'); return; }
+  const L = T[lang];
+  show('examplesCard');
+  $('examplesContent').innerHTML = examples.map((ex, i) => `
+    <div style="${i < examples.length - 1 ? 'margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--bd)' : ''}">
+      <div style="margin-bottom:6px">
+        <span style="font-size:10px;color:#f87171;font-weight:600;font-family:'DM Sans';text-transform:uppercase;letter-spacing:.06em">${L.original}</span>
+        <p style="font-size:12px;line-height:1.7;color:#a0a0b2;margin-top:3px;text-decoration:line-through;text-decoration-color:rgba(248,113,113,.3)">${ex.original}</p>
+      </div>
+      <div style="margin-bottom:5px">
+        <span style="font-size:10px;color:#6ee7b7;font-weight:600;font-family:'DM Sans';text-transform:uppercase;letter-spacing:.06em">${L.optimized}</span>
+        <p style="font-size:12px;line-height:1.7;color:var(--tx);margin-top:3px">${ex.optimized}</p>
+      </div>
+      <p style="font-size:11px;color:var(--mu);font-style:italic">${L.reason}: ${ex.reason}</p>
+    </div>
+  `).join('');
+}
+
+// === Main Actions ===
+async function analyze() {
+  if (!content.trim()) { show('errorMsg'); $('errorMsg').textContent = T[lang].emptyWarn; return; }
+  hide('errorMsg'); hide('inputPhase'); show('loadingPhase');
+  startLoading(T[lang].loading, $('loadingText'));
+
+  try {
+    const P = PROMPTS[lang];
+    const text = await callAPI(P.analyze, P.userMsg(content.slice(0, 10000)), 3000);
+    result = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+    stopLoading(); hide('loadingPhase'); show('resultPhase');
+    renderScoreRing(result.overall_score);
+    $('summaryText').textContent = result.summary || '';
+    renderDimensions(result.dimensions || []);
+    renderExamples(result.rewrite_examples);
+
+    // Reset rewrite state
+    rewrittenMd = '';
+    show('rewritePrompt'); hide('rewriteLoading'); hide('rewriteResult');
+  } catch (err) {
+    console.error(err);
+    stopLoading(); hide('loadingPhase'); show('inputPhase');
+    show('errorMsg'); $('errorMsg').textContent = T[lang].errorMsg;
+  }
+}
+
+async function generateRewrite() {
+  hide('rewritePrompt'); show('rewriteLoading');
+  startLoading(T[lang].rewriteLoading, $('rewriteLoadingText'));
+
+  try {
+    const P = PROMPTS[lang];
+    const ctx = JSON.stringify({ overall_score: result.overall_score, summary: result.summary, dimensions: result.dimensions });
+    rewrittenMd = await callAPI(P.rewrite, `GEO Analysis:\n${ctx}\n\nOriginal:\n${content.slice(0, 10000)}`, 6000);
+
+    stopLoading(); hide('rewriteLoading'); show('rewriteResult');
+    $('rewritePreview').textContent = rewrittenMd;
+  } catch (err) {
+    console.error(err);
+    stopLoading(); hide('rewriteLoading'); show('rewritePrompt');
+    show('resultError'); $('resultError').textContent = T[lang].errorMsg;
+  }
+}
+
+function downloadMd() {
+  const blob = new Blob([rewrittenMd], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${fileName ? fileName.replace(/\.\w+$/, '') : 'article'}-GEO-optimized.md`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function resetAll() {
+  content = ''; fileName = ''; result = null; rewrittenMd = '';
+  $('textInput').value = '';
+  hide('resultPhase'); hide('errorMsg'); hide('resultError');
+  show('inputPhase');
+  // Reset upload area
+  hide('fileLoaded'); show('uploadPrompt');
+  $('analyzeBtn').disabled = true;
+  updateCharCount();
+}
+
+// === Init ===
+applyLang();
+</script>
+</body>
+</html>
